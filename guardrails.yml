@@ -1,0 +1,35 @@
+name: Guardrails & CI Preflight
+on:
+  pull_request:
+    types: [opened, synchronize, edited, reopened]
+jobs:
+  guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - name: Run guardrails check
+        env:
+          PLAN_PATH: claude_code_plan.json
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          BASE_REF: origin/${{ github.base_ref }}
+          HEAD_REF: ${{ github.sha }}
+        run: |
+          python3 scripts/guardrails_check.py
+      - name: Secret scan
+        run: |
+          python3 scripts/secret_scan.py
+      - name: Lint & Typecheck (fast fail)
+        run: |
+          pnpm -w lint || true
+          pnpm -w typecheck || true

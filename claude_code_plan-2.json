@@ -1,0 +1,1107 @@
+{
+  "schema_version": "cc.v1",
+  "generated_at": "2025-08-16",
+  "project": {
+    "name": "Anon Alias + Akıllı Birleşik Mesaj Kutusu (MVP)",
+    "goals": [
+      "Kullanıcıların marka kayıtlarında anonim e-posta alias kullanabilmesi",
+      "Gelen e-postaları tek uygulamada toplama, sınıflandırma ve olay çıkarma",
+      "Önemli olaylar için akıllı bildirim",
+      "Maskeli yanıt (reply-via)",
+      "KVKK/GDPR temel uyumluluk"
+    ]
+  },
+  "guardrails": {
+    "editing_policy": {
+      "allowed_files_patterns": [
+        "apps/backend/**",
+        "apps/web/**",
+        "apps/mobile/**",
+        "packages/shared/**",
+        "infra/**",
+        ".github/workflows/**",
+        "docker/**",
+        "scripts/**",
+        "prisma/**",
+        "sql/**"
+      ],
+      "prohibited_files_patterns": [
+        "**/*.pem",
+        "**/.env",
+        "**/.env.*",
+        "infra/dns/**",
+        "infra/prod/**",
+        "docs/legal/**"
+      ],
+      "immutable_files": [
+        "CODEOWNERS",
+        "SECURITY.md",
+        "docs/ARCHITECTURE.md"
+      ],
+      "edit_style": "small_scoped_diffs",
+      "ask_before_large_change": true,
+      "require_design_comment_on_complex_diff": true
+    }
+  },
+  "workspace": {
+    "structure": [
+      "apps/backend (NestJS)",
+      "apps/web (Next.js)",
+      "apps/mobile (Expo)",
+      "packages/shared (types, utils)",
+      "infra (terraform, pipelines)",
+      "prisma or sql (schema & migrations)",
+      "docker (compose, Dockerfiles)",
+      "scripts (seed, smoke)"
+    ],
+    "commands": {
+      "dev": "docker compose up -d && pnpm -w dev",
+      "test": "pnpm -w test",
+      "e2e_smoke": "pnpm -w test:e2e:smoke",
+      "lint": "pnpm -w lint",
+      "typecheck": "pnpm -w typecheck",
+      "build": "pnpm -w build"
+    }
+  },
+  "epics": [
+    {
+      "id": "E1",
+      "name": "Monorepo & Temel Altyapı",
+      "tasks": [
+        {
+          "id": "E1-T1",
+          "name": "Monorepo iskeleti",
+          "todos": [
+            {
+              "id": "E1-T1-1",
+              "title": "Turborepo init ve ortak config",
+              "acceptance_criteria": [
+                "`pnpm i && pnpm -w build` tüm paketleri derler",
+                "Pre-commit lint/format hatada commit’i engeller",
+                "packages/shared içeriği web & backend tarafından import edilir"
+              ],
+              "test_steps": [
+                "Lint ihlaliyle commit dene → engellenmeli",
+                "shared içine bir type ekle; web/backend’te derlenmeli"
+              ]
+            },
+            {
+              "id": "E1-T1-2",
+              "title": "Ortam değişkeni şablonları",
+              "acceptance_criteria": [
+                "Yeni geliştirici .env.example ile projeyi ayağa kaldırabilir",
+                ".env git’e girmez",
+                "Yerel çalışma dokümantasyonu net"
+              ],
+              "test_steps": [
+                "Temiz makinede kurulum yap; dev ortamı çalışmalı",
+                "`git add .env` dene → dahil edilmemeli"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E1-T2",
+          "name": "CI/CD boru hattı",
+          "todos": [
+            {
+              "id": "E1-T2-1",
+              "title": "Build/Test/Lint workflows",
+              "acceptance_criteria": [
+                "PR açılınca CI tetiklenir",
+                "Başarısız adım PR üzerinde görünür",
+                "Cache ile ardışık buildler %30+ hızlı"
+              ],
+              "test_steps": [
+                "Bilerek lint hatasıyla PR aç → kırılmalı",
+                "İki ardışık build süresi karşılaştır"
+              ]
+            },
+            {
+              "id": "E1-T2-2",
+              "title": "Backend container & staging deploy",
+              "acceptance_criteria": [
+                "Docker image lokal çalışır",
+                "Main merge sonrası staging URL /healthz 200",
+                "Rollback adımı dokümante"
+              ],
+              "test_steps": [
+                "Yerelde build/run ve /healthz testi",
+                "Staging’e deploy sonrası /healthz 200 doğrula"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E1-T3",
+          "name": "Yerel geliştirme orkestrasyonu",
+          "todos": [
+            {
+              "id": "E1-T3-1",
+              "title": "docker-compose ile DB/Redis/MinIO",
+              "acceptance_criteria": [
+                "`docker compose up` sonrası tüm servisler sağlıklı",
+                "Migrasyonlar tamamlanır",
+                "MinIO paneli erişilebilir"
+              ],
+              "test_steps": [
+                "`curl /healthz` 200",
+                "DB tabloları listelenir",
+                "MinIO upload/download çalışır"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E2",
+      "name": "Kimlik & Hesap Yönetimi",
+      "tasks": [
+        {
+          "id": "E2-T1",
+          "name": "Auth akışları",
+          "todos": [
+            {
+              "id": "E2-T1-1",
+              "title": "Signup + e-posta doğrulama",
+              "acceptance_criteria": [
+                "Doğrulanmamış kullanıcı korumalı sayfalara erişemez",
+                "Zayıf şifrelere izin verilmez",
+                "Onboarding tamamlandığında bayrak güncellenir"
+              ],
+              "test_steps": [
+                "Doğrulamadan korumalı route 401",
+                "Zayıf şifre reddi"
+              ]
+            },
+            {
+              "id": "E2-T1-2",
+              "title": "Session yenileme ve logout",
+              "acceptance_criteria": [
+                "Session süresi dolunca sessiz yenileme yapılır",
+                "Tüm cihazlardan çıkış tetiklenebilir",
+                "Idle timeout süresinde yeniden giriş istenir"
+              ],
+              "test_steps": [
+                "Refresh token iptal edilip istek 401",
+                "Global logout sonrası 401"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E2-T2",
+          "name": "Rol & yetkilendirme",
+          "todos": [
+            {
+              "id": "E2-T2-1",
+              "title": "RBAC guard middleware",
+              "acceptance_criteria": [
+                "Admin endpoint'lere sadece admin rolü erişir",
+                "Yetkisiz erişimler 403 ve audit loglanır"
+              ],
+              "test_steps": [
+                "User rolüyle 403",
+                "Admin rolüyle 200"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E3",
+      "name": "Domain & Alias Servisi (E-posta)",
+      "tasks": [
+        {
+          "id": "E3-T1",
+          "name": "DNS & SES Inbound kurulumu",
+          "todos": [
+            {
+              "id": "E3-T1-1",
+              "title": "MX, SPF, DKIM, DMARC kayıtlarını ekle",
+              "acceptance_criteria": [
+                "SES domain verified",
+                "DKIM geçer, SPF Pass, DMARC aligned",
+                "mail-tester skoru ≥ 9/10"
+              ],
+              "test_steps": [
+                "Harici hesaptan alias domainine test mail",
+                "SES loglarında SPF/DKIM/DMARC kontrol",
+                "mail-tester doğrulama"
+              ],
+              "negative_tests": [
+                "Yanlış SPF include → SPF fail",
+                "Eksik DKIM → fail"
+              ],
+              "pitfalls": [
+                "DNS yayılım",
+                "DMARC p=reject'i erken açma"
+              ]
+            },
+            {
+              "id": "E3-T1-2",
+              "title": "Inbound rule-set ve hedef S3/R2",
+              "acceptance_criteria": [
+                "Gelen e-postalar S3/R2'de prefix ile saklanır",
+                ">25MB ek reddedilir/ parça politika dokümante"
+              ],
+              "test_steps": [
+                "1MB/20MB/30MB e-posta gönder ve doğrula",
+                "S3 metadata'da Message-Id bulunur"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E3-T2",
+          "name": "Alias API ve adres üretimi",
+          "todos": [
+            {
+              "id": "E3-T2-1",
+              "title": "Alias oluştur/oku/sil endpointleri",
+              "acceptance_criteria": [
+                "Aynı adres iki kullanıcıda oluşmaz (UNIQUE)",
+                "Silinen alias'a mail düşmez"
+              ],
+              "test_steps": [
+                "Arka arkaya alias (benzersiz)",
+                "Silinen alias'a test mail → reddedilmeli"
+              ],
+              "negative_tests": [
+                "Yasaklı karakter reddi",
+                "429 rate limit"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E3-T3",
+          "name": "Sağlık kontrolleri ve uyarılar",
+          "todos": [
+            {
+              "id": "E3-T3-1",
+              "title": "MX/DKIM sağlık cron'u",
+              "acceptance_criteria": [
+                "Kayıt değişince 5dk içinde uyarı",
+                "Dashboard’da son doğrulama görünür"
+              ],
+              "test_steps": [
+                "Yanlış DKIM CNAME simüle → uyarı"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E4",
+      "name": "E-posta Alım & Normalize Pipeline",
+      "tasks": [
+        {
+          "id": "E4-T1",
+          "name": "Lambda ingest",
+          "todos": [
+            {
+              "id": "E4-T1-1",
+              "title": "Raw kaydet ve metadata üret",
+              "acceptance_criteria": [
+                "Idempotency: aynı Message-Id ikinci kez işlenmez",
+                "Eksik zorunlu header → karantina"
+              ],
+              "test_steps": [
+                "Replay → ikinci işlenmemeli",
+                "Subject'siz → karantina"
+              ],
+              "negative_tests": [
+                "Bozuk MIME",
+                "Çok büyük ek"
+              ],
+              "pitfalls": [
+                "Message-Id güvenilmez → body hash",
+                "Saat/dil farkları"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E4-T2",
+          "name": "Inbound Webhook",
+          "todos": [
+            {
+              "id": "E4-T2-1",
+              "title": "İmza doğrulama ve rate limit",
+              "acceptance_criteria": [
+                "Yanlış imza 401",
+                "Burst'te 429"
+              ],
+              "test_steps": [
+                "Yanlış imza ile istek",
+                "1000/30s load test"
+              ]
+            },
+            {
+              "id": "E4-T2-2",
+              "title": "Mesaj kaydı ve kuyruğa atma",
+              "acceptance_criteria": [
+                "DB hata → kuyruk yok",
+                "job id ↔ mesaj id eşleşir"
+              ],
+              "test_steps": [
+                "DB arızası simülasyonu",
+                "Başarılı durumda DB + kuyruk kayıt"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E4-T3",
+          "name": "MIME parse & güvenlik",
+          "todos": [
+            {
+              "id": "E4-T3-1",
+              "title": "Text/HTML çıkarımı ve sanitize",
+              "acceptance_criteria": [
+                "XSS render edilmez",
+                "UTF-8 dışı doğru görünür"
+              ],
+              "test_steps": [
+                "XSS içeren mail test",
+                "ISO-8859-9 görüntüleme"
+              ]
+            },
+            {
+              "id": "E4-T3-2",
+              "title": "Ek tarama ve karantina",
+              "acceptance_criteria": [
+                "Zararlı ek indirilemez",
+                "Temiz ek indirilebilir"
+              ],
+              "test_steps": [
+                "EICAR dosyası ile blok kontrol"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E5",
+      "name": "Mesaj Depolama, Arama & Listeleme API’leri",
+      "tasks": [
+        {
+          "id": "E5-T1",
+          "name": "Listeleme ve filtreleme",
+          "todos": [
+            {
+              "id": "E5-T1-1",
+              "title": "GET /v1/messages",
+              "acceptance_criteria": [
+                "10k mesajda P95 < 300ms",
+                "Case-insensitive arama",
+                "TR karakter desteği"
+              ],
+              "test_steps": [
+                "Latency ölçümleri",
+                "İ/ı/ş/Ş aramaları"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E5-T2",
+          "name": "Mesaj detayı",
+          "todos": [
+            {
+              "id": "E5-T2-1",
+              "title": "GET /v1/messages/:id",
+              "acceptance_criteria": [
+                "Silinmiş 404",
+                "Başkasının 403"
+              ],
+              "test_steps": [
+                "403 denemesi",
+                "404 denemesi"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E6",
+      "name": "Sınıflandırma & Olay Çıkarma (AI-lite)",
+      "tasks": [
+        {
+          "id": "E6-T1",
+          "name": "Heuristik ve regex temelleri",
+          "todos": [
+            {
+              "id": "E6-T1-1",
+              "title": "Kural tabanlı sınıflandırma",
+              "acceptance_criteria": [
+                "Seed isabet ≥%80",
+                "Low confidence → other"
+              ],
+              "test_steps": [
+                "100 örnek rapor",
+                "Sınır vakaları incele"
+              ],
+              "negative_tests": [
+                "RE:/FWD: yanıltıcı",
+                "Gizli HTML metinler"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E6-T2",
+          "name": "Tarih/son-gün çıkarımı",
+          "todos": [
+            {
+              "id": "E6-T2-1",
+              "title": "Deadline parser",
+              "acceptance_criteria": [
+                "±1 gün P95",
+                "En alakalı tarihi seçer"
+              ],
+              "test_steps": [
+                "'Son gün yarın 23:59'",
+                "'Kargo yarın çıkar'"
+              ],
+              "pitfalls": [
+                "DD/MM vs MM/DD",
+                "24h/12h saat"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E6-T3",
+          "name": "Hafif ML sınıflandırıcı",
+          "todos": [
+            {
+              "id": "E6-T3-1",
+              "title": "Model eğitim pipeline'ı",
+              "acceptance_criteria": [
+                "Macro F1 ≥ 0.85",
+                "Model versiyonu API'de"
+              ],
+              "test_steps": [
+                "Baseline vs ML",
+                "Rollback senaryosu"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E6-T4",
+          "name": "Özetleyici (gated)",
+          "todos": [
+            {
+              "id": "E6-T4-1",
+              "title": "Uzunluk/önem eşiği + LLM",
+              "acceptance_criteria": [
+                "LLM çağrı oranı ≤%15",
+                "Özet ≤ 2 cümle"
+              ],
+              "test_steps": [
+                "Kısa mailde çağrı yok",
+                "Uzun+önemlide özet"
+              ],
+              "pitfalls": [
+                "PII maskeleme",
+                "Maliyet kontrol"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E6-T5",
+          "name": "Event yazımı ve idempotency",
+          "todos": [
+            {
+              "id": "E6-T5-1",
+              "title": "Event tekillik ve upsert",
+              "acceptance_criteria": [
+                "Dupe yazım yok",
+                "Audit güncelleme kaydı"
+              ],
+              "test_steps": [
+                "İki kez işleme → tek kayıt",
+                "Güncelleme akışı"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E6-T6",
+          "name": "Değerlendirme harness'i",
+          "todos": [
+            {
+              "id": "E6-T6-1",
+              "title": "Rapor ve hata analizi",
+              "acceptance_criteria": [
+                "Raporlar CI artifact",
+                "Top-10 hata örnekleri"
+              ],
+              "test_steps": [
+                "Seed veri raporu",
+                "Kural güncelle sonrası tekrar ölç"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E7",
+      "name": "Kurallar (Mute/Önemli/Auto-Archive)",
+      "tasks": [
+        {
+          "id": "E7-T1",
+          "name": "Rule engine",
+          "todos": [
+            {
+              "id": "E7-T1-1",
+              "title": "Koşul-aksiyon & öncelik",
+              "acceptance_criteria": [
+                "Çakışmada en yüksek öncelik",
+                "Audit log"
+              ],
+              "test_steps": [
+                "Çakışan kurallar testi",
+                "Mute sonrası bildirim yok"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E7-T2",
+          "name": "UI entegrasyonu",
+          "todos": [
+            {
+              "id": "E7-T2-1",
+              "title": "Mesajdan kural oluşturma",
+              "acceptance_criteria": [
+                "Butona basınca kural listede",
+                "10sn içinde undo"
+              ],
+              "test_steps": [
+                "Sessize al → bildirim gelmesin",
+                "Undo → bildirim gelsin"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E8",
+      "name": "Akıllı Bildirimler",
+      "tasks": [
+        {
+          "id": "E8-T1",
+          "name": "Push token yönetimi",
+          "todos": [
+            {
+              "id": "E8-T1-1",
+              "title": "Token kayıt/yenileme",
+              "acceptance_criteria": [
+                "Çoklu token",
+                "Expired token cleanup"
+              ],
+              "test_steps": [
+                "Token refresh",
+                "Silinen token'a gönderim denemesi"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E8-T2",
+          "name": "Zamanlama ve erteleme",
+          "todos": [
+            {
+              "id": "E8-T2-1",
+              "title": "Planlayıcı işçisi",
+              "acceptance_criteria": [
+                "T-24h & T-2h tetikler",
+                "Duplicate tetik yok"
+              ],
+              "test_steps": [
+                "Yakın due_at testi",
+                "Çift ekleme bir kez tetikler"
+              ],
+              "pitfalls": [
+                "DST",
+                "TZ uyuşmazlığı"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E8-T3",
+          "name": "Sessiz saatler ve özet mod",
+          "todos": [
+            {
+              "id": "E8-T3-1",
+              "title": "Sessiz saatler",
+              "acceptance_criteria": [
+                "Aralıkta push yok",
+                "Bitişte tek özet"
+              ],
+              "test_steps": [
+                "Aralıkta çok event → tek bildirim",
+                "Aralık dışı normal"
+              ]
+            },
+            {
+              "id": "E8-T3-2",
+              "title": "Günlük özet",
+              "acceptance_criteria": [
+                "Tercih aktifse gönder",
+                "Boşsa gönderilmez"
+              ],
+              "test_steps": [
+                "Gün sonu özet",
+                "Boş içerikte yok"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E9",
+      "name": "Maskeli Yanıt (Reply-via)",
+      "tasks": [
+        {
+          "id": "E9-T1",
+          "name": "Yanıt oluşturma",
+          "todos": [
+            {
+              "id": "E9-T1-1",
+              "title": "POST /v1/messages/:id/reply",
+              "acceptance_criteria": [
+                "DMARC uyumlu teslim",
+                "UI’da durum görünür"
+              ],
+              "test_steps": [
+                "Karşı hesaba teslim",
+                "Farklı kullanıcı 403"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E9-T2",
+          "name": "Outbound SMTP ve imzalama",
+          "todos": [
+            {
+              "id": "E9-T2-1",
+              "title": "SES gönderim ve oran sınırı",
+              "acceptance_criteria": [
+                "Limitte kuyruğa park",
+                "DKIM geçer"
+              ],
+              "test_steps": [
+                "Yük testinde limit davranışı",
+                "mail-tester DKIM"
+              ],
+              "pitfalls": [
+                "SPF alignment",
+                "Reply-To spoof algısı"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E9-T3",
+          "name": "Bounce/Complaint/Abuse",
+          "todos": [
+            {
+              "id": "E9-T3-1",
+              "title": "SNS webhook entegrasyonu",
+              "acceptance_criteria": [
+                "Hard bounce sonrası tekrar yok",
+                "Complaint artışında oran düşürme"
+              ],
+              "test_steps": [
+                "Bounce simülasyonu",
+                "Complaint oranı artışı → throttling"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E10",
+      "name": "Web Uygulaması (Next.js)",
+      "tasks": [
+        {
+          "id": "E10-T1",
+          "name": "Inbox ekranı",
+          "todos": [
+            {
+              "id": "E10-T1-1",
+              "title": "Liste ve filtre UI",
+              "acceptance_criteria": [
+                "10k öğede akıcı scroll",
+                "Debounce arama & filtre"
+              ],
+              "test_steps": [
+                "Büyük veriyle scroll",
+                "Filtre kombinasyonları"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E10-T2",
+          "name": "Mesaj detay & olay kartları",
+          "todos": [
+            {
+              "id": "E10-T2-1",
+              "title": "Detay görünümü",
+              "acceptance_criteria": [
+                "XSS güvenliği",
+                "Aksiyonlar geri bildirim verir"
+              ],
+              "test_steps": [
+                "Zararlı içerik render güvenliği",
+                "Aksiyon API çağrıları"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E11",
+      "name": "Mobil Uygulama (React Native – Expo)",
+      "tasks": [
+        {
+          "id": "E11-T1",
+          "name": "Auth ve push token",
+          "todos": [
+            {
+              "id": "E11-T1-1",
+              "title": "Login ekranı ve token gönderimi",
+              "acceptance_criteria": [
+                "Login sonrası token backend’de",
+                "Logout token siler"
+              ],
+              "test_steps": [
+                "Login-logout döngüsü",
+                "Test bildirimi alınır"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E11-T2",
+          "name": "Inbox ve detay",
+          "todos": [
+            {
+              "id": "E11-T2-1",
+              "title": "Liste/Detay navigasyonu",
+              "acceptance_criteria": [
+                "60fps’e yakın scroll",
+                "Detay 500ms altı"
+              ],
+              "test_steps": [
+                "Düşük cihaz simülasyonu",
+                "Pull-to-refresh yeni mesaj"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E12",
+      "name": "Tarayıcı Eklentisi (Alias Auto-Fill)",
+      "tasks": [
+        {
+          "id": "E12-T1",
+          "name": "Form algılama",
+          "todos": [
+            {
+              "id": "E12-T1-1",
+              "title": "Content script ve buton yerleşimi",
+              "acceptance_criteria": [
+                "Popüler sitelerde çakışma yok",
+                "Buton alias tetikler"
+              ],
+              "test_steps": [
+                "Top 20 sitede manuel test",
+                "Hata durumunda sessiz düşme"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E12-T2",
+          "name": "Alias API entegrasyonu",
+          "todos": [
+            {
+              "id": "E12-T2-1",
+              "title": "POST /v1/aliases çağrısı",
+              "acceptance_criteria": [
+                "Tekrar tık → yeni alias",
+                "429’da kullanıcı uyarısı"
+              ],
+              "test_steps": [
+                "Art arda 5 tık → 5 alias",
+                "429 mesajı"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E13",
+      "name": "Gizlilik, İzin & Veri Hakları",
+      "tasks": [
+        {
+          "id": "E13-T1",
+          "name": "Consent yönetimi",
+          "todos": [
+            {
+              "id": "E13-T1-1",
+              "title": "Consent CRUD ve denetimi",
+              "acceptance_criteria": [
+                "İzin yoksa işleme yok",
+                "Revocation anında etkili"
+              ],
+              "test_steps": [
+                "Consent off → 403",
+                "Revocation sonrası veri dışı"
+              ],
+              "pitfalls": [
+                "Shadow copy",
+                "Cache’de eski izin"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E13-T2",
+          "name": "Veri ihracı (export)",
+          "todos": [
+            {
+              "id": "E13-T2-1",
+              "title": "GET /v1/me/export",
+              "acceptance_criteria": [
+                "24 saat içinde hazır",
+                "Tek kullanımlık/süreli link"
+              ],
+              "test_steps": [
+                "Küçük/büyük hesap export",
+                "Expired link başarısız"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E13-T3",
+          "name": "Hesap silme",
+          "todos": [
+            {
+              "id": "E13-T3-1",
+              "title": "DELETE /v1/me",
+              "acceptance_criteria": [
+                "Alias anında disable",
+                "30 gün içinde tüm veriler silinir"
+              ],
+              "test_steps": [
+                "Silme sonrası alias’a mail düşmez",
+                "30 gün sonra 404"
+              ],
+              "pitfalls": [
+                "Yedek retention",
+                "Object storage leftover"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E14",
+      "name": "Telemetri, Loglama & Sağlık",
+      "tasks": [
+        {
+          "id": "E14-T1",
+          "name": "Health-check ve readiness",
+          "todos": [
+            {
+              "id": "E14-T1-1",
+              "title": "/healthz ve /readiness",
+              "acceptance_criteria": [
+                "/healthz 200",
+                "Readiness false iken trafik alınmaz"
+              ],
+              "test_steps": [
+                "DB kapalıyken readiness false",
+                "K8s probe başarılı"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E14-T2",
+          "name": "Metrikler ve dashboard",
+          "todos": [
+            {
+              "id": "E14-T2-1",
+              "title": "Ingest süresi, bildirim P95",
+              "acceptance_criteria": [
+                "P95 panellerde görünür",
+                "Eşik aşımında alarm"
+              ],
+              "test_steps": [
+                "Yük testi P95 artışı",
+                "Eşik altına inince alarm sönümlenir"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E15",
+      "name": "Planlama & Ücretlendirme (MVP basit)",
+      "tasks": [
+        {
+          "id": "E15-T1",
+          "name": "Feature flags",
+          "todos": [
+            {
+              "id": "E15-T1-1",
+              "title": "Flag servis ve UI gizleme",
+              "acceptance_criteria": [
+                "Free kullanıcı premium ekrana giremez",
+                "Plan değişince flags anında"
+              ],
+              "test_steps": [
+                "Upgrade → açılır",
+                "Downgrade → kapanır"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E15-T2",
+          "name": "Stripe entegrasyonu",
+          "todos": [
+            {
+              "id": "E15-T2-1",
+              "title": "Abonelik başlat/iptal",
+              "acceptance_criteria": [
+                "Ödeme sonrası plan=premium",
+                "İptalde free’e düşer"
+              ],
+              "test_steps": [
+                "Test kart ödeme",
+                "İptal → plan değişimi"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E16",
+      "name": "SMS Alias (Premium)",
+      "tasks": [
+        {
+          "id": "E16-T1",
+          "name": "Numara envanteri",
+          "todos": [
+            {
+              "id": "E16-T1-1",
+              "title": "Numara satın alma ve havuz yönetimi",
+              "acceptance_criteria": [
+                "Kullanıcı başına tek aktif numara",
+                "Boşta kalan numaralar yeniden kullanılır"
+              ],
+              "test_steps": [
+                "Tahsis → iptal → yeniden tahsis",
+                "Havuz tükenince uygun hata"
+              ],
+              "pitfalls": [
+                "KYC gereksinimleri",
+                "Taşıma/ücret sürprizleri"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E16-T2",
+          "name": "Inbound SMS webhook",
+          "todos": [
+            {
+              "id": "E16-T2-1",
+              "title": "Webhook doğrulama ve mesaj kaydı",
+              "acceptance_criteria": [
+                "Yanlış imza 401",
+                "Bilinmeyen numara 404/karantina"
+              ],
+              "test_steps": [
+                "Geçersiz imza → 401",
+                "Bilinmeyen numara → karantina"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "E16-T3",
+          "name": "Outbound SMS",
+          "todos": [
+            {
+              "id": "E16-T3-1",
+              "title": "Gönderim ve oran kontrolü",
+              "acceptance_criteria": [
+                "OTP P95 < 3s",
+                "Abuse eşiğinde gönderim durur"
+              ],
+              "test_steps": [
+                "Yük altında OTP latansı",
+                "Abuse senaryosu blok"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E17",
+      "name": "B2B Gizlilik-Dostu Raporlama",
+      "tasks": [
+        {
+          "id": "E17-T1",
+          "name": "Agregasyon jobları",
+          "todos": [
+            {
+              "id": "E17-T1-1",
+              "title": "Consent filtresi ile agregasyon",
+              "acceptance_criteria": [
+                "Consent olmayan veri dahil edilmez",
+                "Tarih/marka bazlı rapor erişimi"
+              ],
+              "test_steps": [
+                "Consent off kullanıcı rapora girmez",
+                "Örnek rapor şema doğrulama"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
