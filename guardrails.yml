@@ -20,7 +20,7 @@ jobs:
           run_install: false
       - name: Run guardrails check
         env:
-          PLAN_PATH: claude_code_plan.json
+          PLAN_PATH: claude_code_plan-2.json
           PR_TITLE: ${{ github.event.pull_request.title }}
           BASE_REF: origin/${{ github.base_ref }}
           HEAD_REF: ${{ github.sha }}

@@ -1,5 +1,5 @@
 Title,Description,Labels
-[EPIC] E1 — Monorepo & Temel Altyapı,See claude_code_plan.json (epic E1),epic
+[EPIC] E1 — Monorepo & Temel Altyapı,See claude_code_plan-2.json (epic E1),epic
 [TASK] E1-T1 — Monorepo iskeleti,Parent Epic: E1,task
 E1-T1-1 — Turborepo init ve ortak config,"Parent Task: E1-T1
 
@@ -54,7 +54,7 @@ Test Steps:
 - `curl /healthz` 200
 - DB tabloları listelenir
 - MinIO upload/download çalışır",todo
-[EPIC] E2 — Kimlik & Hesap Yönetimi,See claude_code_plan.json (epic E2),epic
+[EPIC] E2 — Kimlik & Hesap Yönetimi,See claude_code_plan-2.json (epic E2),epic
 [TASK] E2-T1 — Auth akışları,Parent Epic: E2,task
 E2-T1-1 — Signup + e-posta doğrulama,"Parent Task: E2-T1
 
@@ -86,7 +86,7 @@ Acceptance Criteria:
 Test Steps:
 - User rolüyle 403
 - Admin rolüyle 200",todo
-[EPIC] E3 — Domain & Alias Servisi (E-posta),See claude_code_plan.json (epic E3),epic
+[EPIC] E3 — Domain & Alias Servisi (E-posta),See claude_code_plan-2.json (epic E3),epic
 [TASK] E3-T1 — DNS & SES Inbound kurulumu,Parent Epic: E3,task
 "E3-T1-1 — MX, SPF, DKIM, DMARC kayıtlarını ekle","Parent Task: E3-T1
 
@@ -127,7 +127,7 @@ Acceptance Criteria:
 
 Test Steps:
 - Yanlış DKIM CNAME simüle → uyarı",todo
-[EPIC] E4 — E-posta Alım & Normalize Pipeline,See claude_code_plan.json (epic E4),epic
+[EPIC] E4 — E-posta Alım & Normalize Pipeline,See claude_code_plan-2.json (epic E4),epic
 [TASK] E4-T1 — Lambda ingest,Parent Epic: E4,task
 E4-T1-1 — Raw kaydet ve metadata üret,"Parent Task: E4-T1
 
@@ -175,7 +175,7 @@ Acceptance Criteria:
 
 Test Steps:
 - EICAR dosyası ile blok kontrol",todo
-"[EPIC] E5 — Mesaj Depolama, Arama & Listeleme API’leri",See claude_code_plan.json (epic E5),epic
+"[EPIC] E5 — Mesaj Depolama, Arama & Listeleme API’leri",See claude_code_plan-2.json (epic E5),epic
 [TASK] E5-T1 — Listeleme ve filtreleme,Parent Epic: E5,task
 E5-T1-1 — GET /v1/messages,"Parent Task: E5-T1
 
@@ -197,7 +197,7 @@ Acceptance Criteria:
 Test Steps:
 - 403 denemesi
 - 404 denemesi",todo
-[EPIC] E6 — Sınıflandırma & Olay Çıkarma (AI-lite),See claude_code_plan.json (epic E6),epic
+[EPIC] E6 — Sınıflandırma & Olay Çıkarma (AI-lite),See claude_code_plan-2.json (epic E6),epic
 [TASK] E6-T1 — Heuristik ve regex temelleri,Parent Epic: E6,task
 E6-T1-1 — Kural tabanlı sınıflandırma,"Parent Task: E6-T1
 
@@ -258,7 +258,7 @@ Acceptance Criteria:
 Test Steps:
 - Seed veri raporu
 - Kural güncelle sonrası tekrar ölç",todo
-[EPIC] E7 — Kurallar (Mute/Önemli/Auto-Archive),See claude_code_plan.json (epic E7),epic
+[EPIC] E7 — Kurallar (Mute/Önemli/Auto-Archive),See claude_code_plan-2.json (epic E7),epic
 [TASK] E7-T1 — Rule engine,Parent Epic: E7,task
 E7-T1-1 — Koşul-aksiyon & öncelik,"Parent Task: E7-T1
 
@@ -279,7 +279,7 @@ Acceptance Criteria:
 Test Steps:
 - Sessize al → bildirim gelmesin
 - Undo → bildirim gelsin",todo
-[EPIC] E8 — Akıllı Bildirimler,See claude_code_plan.json (epic E8),epic
+[EPIC] E8 — Akıllı Bildirimler,See claude_code_plan-2.json (epic E8),epic
 [TASK] E8-T1 — Push token yönetimi,Parent Epic: E8,task
 E8-T1-1 — Token kayıt/yenileme,"Parent Task: E8-T1
 
@@ -319,7 +319,7 @@ Acceptance Criteria:
 Test Steps:
 - Gün sonu özet
 - Boş içerikte yok",todo
-[EPIC] E9 — Maskeli Yanıt (Reply-via),See claude_code_plan.json (epic E9),epic
+[EPIC] E9 — Maskeli Yanıt (Reply-via),See claude_code_plan-2.json (epic E9),epic
 [TASK] E9-T1 — Yanıt oluşturma,Parent Epic: E9,task
 E9-T1-1 — POST /v1/messages/:id/reply,"Parent Task: E9-T1
 
@@ -350,7 +350,7 @@ Acceptance Criteria:
 Test Steps:
 - Bounce simülasyonu
 - Complaint oranı artışı → throttling",todo
-[EPIC] E10 — Web Uygulaması (Next.js),See claude_code_plan.json (epic E10),epic
+[EPIC] E10 — Web Uygulaması (Next.js),See claude_code_plan-2.json (epic E10),epic
 [TASK] E10-T1 — Inbox ekranı,Parent Epic: E10,task
 E10-T1-1 — Liste ve filtre UI,"Parent Task: E10-T1
 
@@ -371,7 +371,7 @@ Acceptance Criteria:
 Test Steps:
 - Zararlı içerik render güvenliği
 - Aksiyon API çağrıları",todo
-[EPIC] E11 — Mobil Uygulama (React Native – Expo),See claude_code_plan.json (epic E11),epic
+[EPIC] E11 — Mobil Uygulama (React Native – Expo),See claude_code_plan-2.json (epic E11),epic
 [TASK] E11-T1 — Auth ve push token,Parent Epic: E11,task
 E11-T1-1 — Login ekranı ve token gönderimi,"Parent Task: E11-T1
 
@@ -392,7 +392,7 @@ Acceptance Criteria:
 Test Steps:
 - Düşük cihaz simülasyonu
 - Pull-to-refresh yeni mesaj",todo
-[EPIC] E12 — Tarayıcı Eklentisi (Alias Auto-Fill),See claude_code_plan.json (epic E12),epic
+[EPIC] E12 — Tarayıcı Eklentisi (Alias Auto-Fill),See claude_code_plan-2.json (epic E12),epic
 [TASK] E12-T1 — Form algılama,Parent Epic: E12,task
 E12-T1-1 — Content script ve buton yerleşimi,"Parent Task: E12-T1
 
@@ -413,7 +413,7 @@ Acceptance Criteria:
 Test Steps:
 - Art arda 5 tık → 5 alias
 - 429 mesajı",todo
-"[EPIC] E13 — Gizlilik, İzin & Veri Hakları",See claude_code_plan.json (epic E13),epic
+"[EPIC] E13 — Gizlilik, İzin & Veri Hakları",See claude_code_plan-2.json (epic E13),epic
 [TASK] E13-T1 — Consent yönetimi,Parent Epic: E13,task
 E13-T1-1 — Consent CRUD ve denetimi,"Parent Task: E13-T1
 
@@ -444,7 +444,7 @@ Acceptance Criteria:
 Test Steps:
 - Silme sonrası alias’a mail düşmez
 - 30 gün sonra 404",todo
-"[EPIC] E14 — Telemetri, Loglama & Sağlık",See claude_code_plan.json (epic E14),epic
+"[EPIC] E14 — Telemetri, Loglama & Sağlık",See claude_code_plan-2.json (epic E14),epic
 [TASK] E14-T1 — Health-check ve readiness,Parent Epic: E14,task
 E14-T1-1 — /healthz ve /readiness,"Parent Task: E14-T1
 
@@ -465,7 +465,7 @@ Acceptance Criteria:
 Test Steps:
 - Yük testi P95 artışı
 - Eşik altına inince alarm sönümlenir",todo
-[EPIC] E15 — Planlama & Ücretlendirme (MVP basit),See claude_code_plan.json (epic E15),epic
+[EPIC] E15 — Planlama & Ücretlendirme (MVP basit),See claude_code_plan-2.json (epic E15),epic
 [TASK] E15-T1 — Feature flags,Parent Epic: E15,task
 E15-T1-1 — Flag servis ve UI gizleme,"Parent Task: E15-T1
 
@@ -486,7 +486,7 @@ Acceptance Criteria:
 Test Steps:
 - Test kart ödeme
 - İptal → plan değişimi",todo
-[EPIC] E16 — SMS Alias (Premium),See claude_code_plan.json (epic E16),epic
+[EPIC] E16 — SMS Alias (Premium),See claude_code_plan-2.json (epic E16),epic
 [TASK] E16-T1 — Numara envanteri,Parent Epic: E16,task
 E16-T1-1 — Numara satın alma ve havuz yönetimi,"Parent Task: E16-T1
 
@@ -517,7 +517,7 @@ Acceptance Criteria:
 Test Steps:
 - Yük altında OTP latansı
 - Abuse senaryosu blok",todo
-[EPIC] E17 — B2B Gizlilik-Dostu Raporlama,See claude_code_plan.json (epic E17),epic
+[EPIC] E17 — B2B Gizlilik-Dostu Raporlama,See claude_code_plan-2.json (epic E17),epic
 [TASK] E17-T1 — Agregasyon jobları,Parent Epic: E17,task
 E17-T1-1 — Consent filtresi ile agregasyon,"Parent Task: E17-T1
 
