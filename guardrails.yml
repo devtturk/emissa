@@ -25,10 +25,10 @@ jobs:
           BASE_REF: origin/${{ github.base_ref }}
           HEAD_REF: ${{ github.sha }}
         run: |
-          python3 scripts/guardrails_check.py
+          python3 guardrails_check.py
       - name: Secret scan
         run: |
-          python3 scripts/secret_scan.py
+          python3 secret_scan.py
       - name: Lint & Typecheck (fast fail)
         run: |
           pnpm -w lint || true
