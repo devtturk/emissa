@@ -2,7 +2,7 @@
 #!/usr/bin/env python3
 import os, json, subprocess, fnmatch, sys, re
 
-PLAN_PATH = os.getenv("PLAN_PATH", "claude_code_plan.json")
+PLAN_PATH = os.getenv("PLAN_PATH", "claude_code_plan-2.json")
 PR_TITLE = os.getenv("PR_TITLE", "")
 BASE = os.getenv("BASE_REF", "origin/main")
 HEAD = os.getenv("HEAD_REF", "HEAD")
