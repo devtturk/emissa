@@ -32,7 +32,7 @@ def main():
         if pat:
             bad.append((f, pat))
     if bad:
-        print("❌ Gizli anahtar iması bulundu:")
+        print("❌ Gizli anahtar izi bulundu:")
         for f, p in bad:
             print(f" - {f}: {p}")
         sys.exit(2)
